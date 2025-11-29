@@ -1,0 +1,183 @@
+{% style %}
+  #section-{{ section.id }}{
+    background: {{ section.settings.background_color }}
+  }
+  #section-{{ section.id }} div h1 .first{
+    color: {{ section.settings.main_heading_color }}
+  }
+  #section-{{ section.id }} div h1 .second{
+    background: -webkit-{{ section.settings.sub_heading_color }};
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+{% endstyle %}
+<style>
+    .container{
+        {% comment %} background: linear-gradient(180deg, #D2CDC6, #F5F5F5); {% endcomment %}
+        height: 100vh;
+        position: relative;
+        overflow:hidden;
+    }
+    .container div{
+        display: flex;
+        align-items: center;
+        justify-content: normal;
+        height: 100%;
+        width: 100%;
+        flex-direction: column;
+    }
+    .container div h1{
+        position: relative;
+        font-size: clamp(3.125rem, 1.9087rem + 7.7844vw, 11.25rem);
+        margin: 180px auto 0;
+        line-height: 140px;
+        width: 80%;
+        text-align: center;
+    }
+    .container div h1 .first{
+        position: relative;
+        z-index: 2;
+        {% comment %} color: #52483E; {% endcomment %}
+    }
+    .container div h1 .second{
+        position: relative;
+        z-index: 0;
+        {% comment %} background: -webkit-linear-gradient(#DACCBC, #AFA497); {% endcomment %}
+        {% comment %} -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent; {% endcomment %}
+    }
+    .container div img{
+        position: absolute;
+        width: auto;
+        height: 90%;
+        top: 0;
+        z-index: 1
+    }
+    @media screen and (max-width: 768px){
+        .container div{
+            padding-top: 50px;
+            justify-content: center;
+            flex-direction: column;
+        }
+        .container div h1{
+            margin: 0;
+            font-size: 50px;
+            line-height: normal;
+
+        }
+        .container div img{
+            position: relative;
+            width: 100%;
+            height: auto;
+       
+           
+        }
+    }
+</style>
+
+<div class="container" id="section-{{ section.id }}">
+    <div>
+        <h1>
+            <span class="first">
+                {{ section.settings.main_heading_text }}</span><br/>
+            <span class="second">
+                {{ section.settings.sub_heading_text }}
+            </span>
+        </h1>
+        <img src='{{ section.settings.image | image_url }}' class="hero_img" width="100" height="100">
+    </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    const loadTl = gsap.timeline();
+
+    loadTl
+      .fromTo(
+        ".second",
+        { opacity: 0 },
+        { opacity: 1, duration: 1.2, ease: "power3.out" },
+        "<0.12"
+      )
+      .fromTo(
+        ".hero_img",
+        { y:'-100%', opacity: 0 },
+        { y:'0%', opacity: 1, duration: 1.5, ease: "power3.out" },
+        "<0.25"
+      )
+      .fromTo(
+        ".first",
+        { opacity: 0 },
+        { opacity: 1, duration: 1.2, ease: "power3.out" },
+        "<0.35"
+      );
+  });
+  
+  // Hero exit animation - ends when products section starts
+    gsap.timeline({
+        scrollTrigger: {
+        trigger: ".container",
+        start: "top top",
+        end: "bottom center", // Changed to end when container leaves viewport
+        scrub: 1,
+        toggleActions: "play none play reverse"
+        }
+    }).to(".hero_img", {
+        y: "65%", // Less movement so it connects better
+        opacity: 0, // Don't fully fade out
+        scale: 0.5,
+        duration: 1,
+        ease: "power2.inOut"
+    });
+</script>
+
+{% schema %}
+{
+    "name": "hero",
+    "settings": [
+        {
+            "type": "color_background",
+            "id": "background_color",
+            "label": "Background Color",
+            "default": "linear-gradient(180deg, #D2CDC6, #F5F5F5)"
+        },
+        {
+            "type": "text",
+            "id": "main_heading_text",
+            "label": "Main Heading",
+            "default": "Resonance"
+        },
+        {
+            "type": "color",
+            "id": "main_heading_color",
+            "label": "Main Heading Color",
+            "default":"#52483E"
+        },
+        {
+            "type": "text",
+            "id": "sub_heading_text",
+            "label": "Sub Heading Text",
+            "default": "Aura Pro ll"
+        },
+        {
+            "type": "color_background",
+            "id": "sub_heading_color",
+            "label": "Sub Heading Color",
+            "default": "linear-gradient(#DACCBC, #AFA497)"
+        },
+        {
+            "type": "image_picker",
+            "id": "image",
+            "label": "Image",
+        }
+    ],
+    "presets":[
+        {
+            "name": "hero"
+        }
+    ]
+}
+{%  endschema %}
