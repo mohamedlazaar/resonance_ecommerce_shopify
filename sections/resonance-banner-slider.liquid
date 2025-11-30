@@ -1,0 +1,162 @@
+
+<style>
+    #section__{{  section.id }}{
+        background: {{ section.settings.background__color }}
+    }
+    .swiper-wrapper{
+        display: flex;
+        gap:10px;
+        padding: 0 25px
+    }
+    .slider_banner{
+        overflow: hidden;
+        width: 80% !important;
+        display: grid;
+        background: wheat;
+        justify-content: center;
+        align-items: center;
+        grid-template-columns: 1fr 1fr !important;
+        border-radius: 25px;
+        height: 500px;
+    }
+    .banner_content{
+        padding: 10px 55px;
+    }
+    .banner_content h3{
+        font-size: 32px;
+        line-height: 42px;
+        font-weight: normal;
+    }
+    .banner_image, .banner_image img{
+        height: 100%
+    }
+    @media screen and (max-width: 768px){
+        .slider_banner{
+            grid-template-columns: 1fr !important;
+            height: auto;
+        }
+        .banner_content{
+            order: 2;
+               padding: 15px 20px;
+        }
+        .banner_image{
+            order: 1
+        }
+
+    }
+    {% comment %} .swiper {
+  width: 600px;
+  height: 300px;
+} {% endcomment %}
+</style>
+<div class="resonance_slider_container swiper" id="section__{{ section.id }}">
+    <div class="swiper-wrapper">
+    {% for block in section.blocks %}
+        {% if block.type == "banner" %}
+            {% style %}
+              #block__{{ block.id }}{
+                background: {{ block.settings.banner_background }}
+              }
+              #block__{{ block.id }} .banner_content h3{
+                color: {{ block.settings.text_color }}
+              }
+            {% endstyle %}
+            <div class="slider_banner swiper-slide" id="block__{{ block.id }}">
+                <div class="banner_content">
+                    <h3>{{ block.settings.banner_text}}</h3>
+                </div>
+                {% if block.settings.banner_image != blank %}
+                <div class="banner_image">
+                    <img src="{{ block.settings.banner_image | image_url }}" width="100" height="100" class="ban_img" />
+                </div>                  
+                {% endif %}
+
+             </div>
+        {% endif %}
+    {%  endfor %}
+    </div>
+</div>
+<script>
+    const swiper = new Swiper('.swiper', {
+      slidesPerView: "auto",
+        spaceBetween: 30,
+        autoplay: false,
+        loop: true,
+
+        // And if we need scrollbar
+        scrollbar: {
+            el: '.swiper-scrollbar',
+            clickable: true,
+        },
+        });
+        gsap.timeline({
+        scrollTrigger: {
+        trigger: ".resonance_slider_container",
+        start: "top bottom", // Start when top of section hits bottom of viewport,
+        scrub: 1,
+        }
+     }).fromTo(".ban_img",  { yPercent: -60, opacity: 0 },{yPercent: 0,  opacity: 1, duration:1.2, ease: "power3.out" });
+
+     gsap.timeline({
+        scrollTrigger: {
+        trigger: ".resonance_slider_container",
+        start: "bottom center", // Start when top of section hits bottom of viewport,
+        scrub: 1,
+        }
+     }).fromTo(".ban_img",  { yPercent: 0, opacity: 1, scale: 1 },{yPercent: 60,  opacity: 0,scale: 0.6, duration:1.2, ease: "power3.out" })
+</script>
+{% schema %}
+{
+    "name": "Banner Slider",
+    "settings": [
+        {
+            "type": "color_background",
+            "id": "background__color",
+            "label": "background color",
+            "default": "#F9F9F9"
+        }
+    ],
+    "blocks": [
+        {
+            "type": "banner",
+            "name": "banner",
+            "settings":[
+                {
+                    "type":"color_background",
+                    "id": "banner_background",
+                    "label": "Banner Background",
+                    "default": "linear-gradient(180deg, #D2CDC6, #F8BF93)"
+                },
+                {
+                    "type": "color",
+                    "label": "Text Color",
+                    "id": "text_color",
+                    "default":"#000000"
+                },
+                {
+                    "type":"text",
+                    "id": "banner_text",
+                    "label": "Banner Text",
+                    "default":"Deep lows. Lush mids. Airy highs. All perfectly in balance."
+                },
+                {
+                    "type": "image_picker",
+                    "id": "banner_image",
+                    "label": "banner Image"
+                }
+            ]
+        }
+
+    ],
+    "presets": [
+        {
+            "name": "Banner Slider",
+            "blocks": [
+                {
+                    "type": "banner"
+                }
+            ]
+        }
+    ]
+}
+{% endschema %}

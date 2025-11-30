@@ -1,0 +1,270 @@
+<style>
+  #section__{{ section.id }}{
+    background: {{ section.settings.background__color }}
+  }
+    .headphone_section {
+  text-align: center;
+  padding: 60px 20px;
+  min-height: 100vh; /* Ensures enough scroll space */
+  overflow: hidden;
+}
+
+.headphone_section h2 {
+  font-size: 36px;
+  font-weight: 700;
+  color: #3d3a37;
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  font-size: 16px;
+  color: #7d7a76;
+  margin-bottom: 40px;
+}
+
+.image_wrapper {
+  position: relative;
+  width: 80%;
+  height: 350px;
+  margin: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+.main_img {
+  position: relative;
+  width: 380px;
+  height: auto;
+  z-index: 10;
+}
+
+.blur_img {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  filter: blur(4px);
+  {% comment %} opacity: .4; {% endcomment %}
+}
+
+.left_blur {
+  left: 0;
+}
+
+.right_blur {
+  right: 0;
+}
+
+.blur_img img {
+  width: 300px;
+  opacity: 0.9;
+}
+
+.color_buttons {
+  margin: 30px 0 10px;
+  display: flex;
+  gap: 25px;
+  justify-content: center;
+}
+
+.color_btn {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  outline: none;
+  transition: transform 0.2s ease;
+}
+
+.color_btn.active {
+  border: 2px solid black;
+  pointer-events: none;
+  cursor: default;
+}
+
+.color_btn:hover {
+  transform: scale(1.15);
+}
+
+.choose {
+  margin-top: 15px;
+  color: #7d7a76;
+}
+@media screen and (max-width: 768px){
+    .left_blur{
+        left: -40%
+    }
+    .right_blur{
+        right: -40%
+    }
+}
+
+</style>
+<div class="headphone_section" id="section__{{ section.id }}">
+  <div class="content">
+    <h2>{{ section.settings.section_title }}</h2>
+    <p class="subtitle">{{ section.settings.section_description }}</p>
+
+    <div class="image_wrapper">
+      {% for variant in section.settings.product.variants %}
+        {% if forloop.first %}
+          <img 
+            src="{{ variant.image | image_url }}"
+            class="main_img"
+            data-variant-index="{{ forloop.index0 }}" width="100" height="100"
+          >
+        {% endif %}
+      {% endfor %}
+
+      <div class="blur_img left_blur">
+        {% assign first_variant = section.settings.product.variants[0] %}
+        {% assign second_variant = section.settings.product.variants[1] %}
+        {% if second_variant.image %}
+          <img src="{{ second_variant.image | image_url }}" width="100" height="100" />
+        {% endif %}
+      </div>
+
+      <div class="blur_img right_blur">
+        {% assign third_variant = section.settings.product.variants[2] %}
+        {% if third_variant.image %}
+          <img src="{{ third_variant.image | image_url }}" width="100" height="100" />
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="color_buttons">
+      {% for variant in section.settings.product.variants %}
+        <button 
+          class="color_btn{% if forloop.first %} active{% endif %}" 
+          data-img="{{ variant.image | image_url }}"
+          style="background-color: {{ variant.option1 | downcase }};"
+        ></button>
+      {% endfor %}
+    </div>
+
+    <p class="choose">Choose a color that fits your flow.</p>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const mainImg = document.querySelector(".main_img");
+  const leftBlur = document.querySelector(".left_blur img");
+  const rightBlur = document.querySelector(".right_blur img");
+  const colorButtons = document.querySelectorAll(".color_btn");
+
+  // Create array of all images from buttons
+  const images = Array.from(colorButtons).map(btn => btn.dataset.img);
+  let currentIndex = 0;
+
+  // Function to update the display
+  function updateSlider(newIndex) {
+    if (newIndex === currentIndex) return;
+
+    currentIndex = newIndex;
+
+    // Update main image
+    mainImg.src = images[currentIndex];
+
+    // Update left blur (previous image, wraps around)
+    const leftIndex = (currentIndex - 1 + images.length) % images.length;
+    leftBlur.src = images[leftIndex];
+
+    // Update right blur (next image, wraps around)
+    const rightIndex = (currentIndex + 1) % images.length;
+    rightBlur.src = images[rightIndex];
+
+    // Update active button state
+    colorButtons.forEach((btn, index) => {
+      btn.classList.toggle("active", index === currentIndex);
+    });
+  }
+
+  // Initialize the slider with proper blur images
+  updateSlider(0);
+
+  // Add click listeners to color buttons
+  colorButtons.forEach((btn, index) => {
+    btn.addEventListener("click", () => {
+      updateSlider(index);
+    });
+  });
+});
+
+
+{% comment %} // Products entrance animation - starts when section enters viewport
+gsap.timeline({
+    scrollTrigger: {
+    trigger: ".headphone_section",
+    start: "top center+=2%", // Start when top of section hits bottom of viewport,
+    end:"bottom bottom",
+    scrub: 1,
+    // markers: true, // uncomment for visual debug in dev
+    }
+})
+.fromTo(".main_img",
+    { yPercent: -55, scale: 1.2, opacity: 0, duration: .4 }, // Start from similar state as hero exit
+    { yPercent: 0, scale: 1, opacity: 1, duration: 1.2, ease: "power3.out" }
+)
+.fromTo(".left_blur",
+    { xPercent: -50, opacity: 0},
+    { xPercent: -5, opacity: 0.4, duration: 1.5, ease: "power3.out" },
+    "<0.2" // Slight delay for stagger effect
+)
+.fromTo(".right_blur",
+    { xPercent: 50, opacity: 0 },
+    { xPercent: 5, opacity: 0.4, duration: 1.5, ease: "power3.out" },
+    "<"
+)
+.fromTo(".headphone_section h2, .subtitle, .color_buttons, .choose",
+    { opacity: 0, y: 20 },
+    { opacity: 1, y: 0, duration: 1, ease: "power2.out", stagger: 0.1 },
+    "<0.5"
+);
+gsap.timeline({
+    scrollTrigger: {
+    trigger: ".headphone_section",
+    start: "bottom bottom", // Start when top of section hits bottom of viewport,
+    end: "bottom top",
+    scrub: 1,
+    }
+}).fromTo(".main_img",  { yPercent: 0, scale:1, opacity: 1 },{yPercent: 100, scale: 2.4, opacity: 0, duration:1.5, ease: "power3.out" }) {% endcomment %}
+</script>
+
+{% schema %}
+{
+  "name": "products with variants",
+  "settings": [
+    {
+      "type": "product",
+      "id": "product",
+      "label": "Product"
+    },
+    {
+      "type": "color_background",
+      "id": "background__color",
+      "label": "Background-color",
+      "default": "#F9F9F9"
+    },
+    {
+      "type": "text",
+      "id": "section_title",
+      "label": "Section Title",
+      "default":"Your Style. Your Sound."
+    },
+    {
+      "type": "text",
+      "id": "section_description",
+      "label": "Section Description",
+      "default": "Studio-grade acoustics that dissolve distractions and awaken clarity."
+    }
+  ],
+  "presets": [
+    {
+      "name": "products with variants"
+    }
+  ]
+}
+{% endschema %}
