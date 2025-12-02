@@ -83,60 +83,6 @@
     </div>
   </div>
 </div>
-<script>
- if(window.innerWidth > 1024){
-
-// DESKTOP ONLY — GSAP animation
-  const wrapper = document.querySelector('.images__{{ section.id }} .wrapper');
-  const slides = gsap.utils.toArray('.images__{{ section.id }} .swiper_img_cont');
-
-  // Ensure wrapper is ready for absolute positioned children
-  wrapper.style.position = 'relative';
-  wrapper.style.minHeight = '50vh';
-
-  // 1️⃣ Capture the final positions BEFORE we change anything
-  const finalPositions = slides.map(slide => ({
-    left: slide.offsetLeft,
-    top: slide.offsetTop,
-    width: slide.offsetWidth,
-    height: slide.offsetHeight
-  }));
-
-  // 2️⃣ Stack all slides at the exact same starting point (top center)
-  slides.forEach(slide => {
-    gsap.set(slide, {
-      position: "absolute",
-      left: "50%",
-      top: "-70%",
-      x: "-50%",
-      opacity: 0,
-      scale: 0.7,
-      zIndex: 10
-    });
-  });
-
-  // 3️⃣ Animate slides into their real grid positions
-  gsap.timeline({
-    scrollTrigger: {
-      trigger: ".images_section",
-      start: "top bottom",
-      end: "bottom 50%",
-      scrub: 1
-    }
-  })
-  .to(slides, {
-    left: (i) => finalPositions[i].left,
-    top: (i) => finalPositions[i].top,
-    x: 0,
-    y: 0,
-    scale: 1,
-    opacity: 1,
-    ease: "power3.out",
-    stagger: 0.15,
-    duration: 1.2
-  });
-}
-</script>
 
 
 
